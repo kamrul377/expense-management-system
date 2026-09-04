@@ -6,7 +6,7 @@ import { user } from '@/lib/db/schema'
 import { count, eq } from 'drizzle-orm'
 
 export async function createInitialAdmin(input: { name: string; email: string; password: string }) {
-  const [{ total }] = await db.select({ total: count() }).from(user)
+  const [{ total }] = await db.select({ total: count() }).from(user).where(eq(user.role, 'ADMIN'))
   if (Number(total) > 0) return { error: 'Initial admin setup has already been completed.' }
 
   const name = input.name.trim()
@@ -17,7 +17,7 @@ export async function createInitialAdmin(input: { name: string; email: string; p
 
   try {
     const result = await auth.api.signUpEmail({ body: { name, email, password: input.password } })
-    if (result.error || !result.user) return { error: 'Unable to create the initial administrator.' }
+    if ('error' in result || !result.user) return { error: 'Unable to create the initial administrator.' }
     await db.update(user).set({ role: 'ADMIN' }).where(eq(user.id, result.user.id))
     return { success: true }
   } catch {
@@ -26,6 +26,6 @@ export async function createInitialAdmin(input: { name: string; email: string; p
 }
 
 export async function isInitialAdminSetupAvailable() {
-  const [{ total }] = await db.select({ total: count() }).from(user)
+  const [{ total }] = await db.select({ total: count() }).from(user).where(eq(user.role, 'ADMIN'))
   return Number(total) === 0
 }
