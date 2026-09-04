@@ -13,7 +13,6 @@ export const auth = betterAuth({
   emailAndPassword: {
     enabled: true,
     autoSignIn: true,
-    disableSignUp: true,
   },
   trustedOrigins: [
     ...(process.env.NODE_ENV === 'development'
