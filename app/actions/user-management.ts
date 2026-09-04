@@ -29,7 +29,7 @@ export async function createManagedAccount(input: { name: string; email: string;
     const result = await auth.api.signUpEmail({
       body: { name, email, password: input.password },
     })
-    if (result.error || !result.user) return { error: 'Unable to create the account.' }
+    if ('error' in result || !result.user) return { error: 'Unable to create the account.' }
     await db.update(user).set({ role: input.role }).where(eq(user.id, result.user.id))
     return { success: true }
   } catch {
